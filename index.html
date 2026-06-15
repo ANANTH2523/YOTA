@@ -181,15 +181,16 @@
           <section class="tool-card bank-card">
             <div class="tool-card-header">
               <div>
-                <p class="eyebrow">Swedish bank monitor</p>
-                <h3>Spending guard</h3>
+                <p class="eyebrow">SolvaPay and bank monitor</p>
+                <h3>Payment guard</h3>
               </div>
-              <span class="small-badge warning">Demo</span>
+              <span class="small-badge warning" id="billingStatus">Checking</span>
             </div>
             <p class="bank-note">
-              Real bank monitoring in Europe must use secure user consent through PSD2/Open Banking.
-              This demo only estimates SEK balance impact after a simulated booking.
+              Hosted checkout is created by the server through SolvaPay. Swedish bank monitoring still
+              requires secure user consent through PSD2/Open Banking.
             </p>
+            <button class="secondary-button full-width" type="button" id="manageBillingButton">Manage SolvaPay billing</button>
             <div class="bank-row">
               <span>Available balance</span>
               <strong id="balanceValue">28 500 SEK</strong>
