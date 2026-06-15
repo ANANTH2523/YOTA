@@ -133,6 +133,10 @@ button {
   position: relative;
   min-height: 260px;
   perspective: 680px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at center 10%, rgba(255, 255, 255, 0.44), transparent 32%),
+    linear-gradient(180deg, transparent 0 42%, rgba(59, 130, 246, 0.08) 42% 43%, transparent 43%);
 }
 
 .runway {
@@ -149,6 +153,27 @@ button {
     linear-gradient(90deg, #111827, var(--runway), #111827);
   clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
   box-shadow: 0 -20px 45px rgba(15, 23, 42, 0.4);
+  animation: runwayRush 4.9s cubic-bezier(0.3, 0.02, 0.2, 1) 450ms forwards;
+}
+
+.runway::before,
+.runway::after {
+  content: "";
+  position: absolute;
+  bottom: 8%;
+  width: 5px;
+  height: 76%;
+  border-radius: 999px;
+  background: repeating-linear-gradient(180deg, #fef3c7 0 7px, transparent 7px 42px);
+  opacity: 0.75;
+}
+
+.runway::before {
+  left: 17%;
+}
+
+.runway::after {
+  right: 17%;
 }
 
 .runway span {
@@ -175,6 +200,35 @@ button {
   height: 150px;
   transform: translateX(-50%) rotate(-2deg);
   animation: takeoff 4.9s cubic-bezier(0.3, 0.02, 0.2, 1) 450ms forwards;
+  filter: drop-shadow(0 18px 18px rgba(15, 23, 42, 0.22));
+}
+
+.plane::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -20px;
+  width: 94px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.25);
+  transform: translateX(-50%) scale(0.9);
+  filter: blur(5px);
+  animation: planeShadow 4.9s cubic-bezier(0.3, 0.02, 0.2, 1) 450ms forwards;
+}
+
+.plane::after {
+  content: "";
+  position: absolute;
+  left: 69px;
+  bottom: -20px;
+  width: 28px;
+  height: 52px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(96, 165, 250, 0.32), transparent);
+  filter: blur(2px);
+  opacity: 0;
+  animation: engineTrail 4.9s ease 450ms forwards;
 }
 
 .plane-body {
@@ -707,21 +761,83 @@ button {
 @keyframes takeoff {
   0% {
     bottom: 28px;
-    transform: translateX(-50%) translateY(0) scale(0.72) rotate(-2deg);
+    transform: translateX(-50%) translateY(0) scale(0.68) rotate(0deg);
     opacity: 1;
   }
-  42% {
-    bottom: 38%;
-    transform: translateX(-50%) translateY(0) scale(0.92) rotate(-2deg);
+  18% {
+    bottom: 38px;
+    transform: translateX(-50%) translateY(3px) scale(0.78) rotate(0deg);
   }
-  68% {
-    bottom: 54%;
-    transform: translateX(-50%) translateY(-20px) scale(1.02) rotate(-10deg);
+  43% {
+    bottom: 34%;
+    transform: translateX(-50%) translateY(0) scale(0.95) rotate(-3deg);
+  }
+  62% {
+    bottom: 51%;
+    transform: translateX(-48%) translateY(-22px) scale(1.04) rotate(-13deg);
+  }
+  82% {
+    bottom: 68%;
+    transform: translateX(8vw) translateY(-78px) scale(0.74) rotate(-18deg);
   }
   100% {
-    bottom: 84%;
-    transform: translateX(28vw) translateY(-110px) scale(0.42) rotate(-17deg);
+    bottom: 86%;
+    transform: translateX(34vw) translateY(-150px) scale(0.34) rotate(-20deg);
     opacity: 0;
+  }
+}
+
+@keyframes planeShadow {
+  0% {
+    opacity: 0.45;
+    transform: translateX(-50%) scale(0.8);
+  }
+  40% {
+    opacity: 0.32;
+    transform: translateX(-50%) scale(1.1);
+  }
+  64% {
+    opacity: 0.18;
+    transform: translateX(-52%) translateY(72px) scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-54%) translateY(170px) scale(2.3);
+  }
+}
+
+@keyframes engineTrail {
+  0%,
+  20% {
+    opacity: 0;
+    transform: scaleY(0.2);
+  }
+  32% {
+    opacity: 0.76;
+    transform: scaleY(0.8);
+  }
+  72% {
+    opacity: 0.42;
+    transform: scaleY(1.25);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1.8);
+  }
+}
+
+@keyframes runwayRush {
+  0% {
+    background-position: 0 0, 0 0, 0 0;
+    filter: brightness(1);
+  }
+  45% {
+    background-position: 0 0, 0 150px, 0 0;
+    filter: brightness(1.15);
+  }
+  100% {
+    background-position: 0 0, 0 360px, 0 0;
+    filter: brightness(0.9);
   }
 }
 

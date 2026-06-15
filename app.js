@@ -147,9 +147,21 @@ async function handleTravelRequest(text) {
   setSubAgentStatus("nlp", "Reading request");
   setSubAgentStatus("payment", "Standing by");
 
-  const analysis = nlpAgent.understandTravelRequest(text, getPreferences());
+  const analysis = nlpAgent.understandTravelRequest(text, getPreferences(), currentTrip);
   setSubAgentStatus("nlp", analysis.status);
   addMessage("agent", analysis.message.text, analysis.message.detail);
+
+  if (analysis.intent === "book_option") {
+    if (!currentOptions.length) {
+      addMessage("agent", "I need to search flights before I can book.", "Send a route first, for example: Stockholm to Tokyo next month.");
+      setUnifiedStatus("Waiting for route details");
+      return;
+    }
+
+    await delay(450);
+    bookOption(analysis.optionId || currentOptions[0].id);
+    return;
+  }
 
   if (analysis.intent !== "travel_search") {
     setUnifiedStatus("Waiting for route details");
@@ -161,7 +173,7 @@ async function handleTravelRequest(text) {
   await delay(650);
 
   currentOptions = nlpAgent.searchFlights(currentTrip);
-  const reply = nlpAgent.searchReply();
+  const reply = nlpAgent.searchReply(currentTrip);
   addMessage("agent", reply.text, reply.detail);
   renderOptions();
 
