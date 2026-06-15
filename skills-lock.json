@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "create-mcp-app": {
+      "source": "solvapay/skills",
+      "sourceType": "github",
+      "skillPath": "skills/create-mcp-app/SKILL.md",
+      "computedHash": "fe09f6fd0db1aab0930c8e16c159fb8cf14224f5b02cc771cec94e9684996550"
+    },
+    "lovable-checkout": {
+      "source": "solvapay/skills",
+      "sourceType": "github",
+      "skillPath": "skills/lovable-checkout/SKILL.md",
+      "computedHash": "3b9020da86dc4a60f5bfd2380683e2d275ae6790a2faa26afbebdd8880ca3d37"
+    },
+    "sdk-integration": {
+      "source": "solvapay/skills",
+      "sourceType": "github",
+      "skillPath": "skills/sdk-integration/SKILL.md",
+      "computedHash": "f9610839b35e82193a396b3b007b9622c3f45ce66384e371e875c53477ddf65f"
+    },
+    "solvapay": {
+      "source": "solvapay/skills",
+      "sourceType": "github",
+      "skillPath": "skills/solvapay/SKILL.md",
+      "computedHash": "6bda8ddeec2ccc09486614bed65147b4eefc8217572160de3a5cf5391c53e7c9"
+    },
+    "website-checkout": {
+      "source": "solvapay/skills",
+      "sourceType": "github",
+      "skillPath": "skills/website-checkout/SKILL.md",
+      "computedHash": "1cf3d378fb3aec547c0821880c24c714b1061cab9de1a2525c57cab337b9529d"
+    }
+  }
+}

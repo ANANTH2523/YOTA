@@ -1,0 +1,10 @@
+{
+  "name": "flytodayai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 5188",
+    "check": "node --check app.js && node --check agents/nlp-agent.js && node --check agents/payment-agent.js"
+  }
+}

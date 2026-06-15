@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en-SE">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YOTA - Your Travel Agent</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="intro" id="intro" aria-label="YOTA runway intro">
+      <div class="sky">
+        <div class="sun"></div>
+        <div class="cloud cloud-one"></div>
+        <div class="cloud cloud-two"></div>
+        <div class="cloud cloud-three"></div>
+      </div>
+      <div class="intro-copy">
+        <p class="eyebrow">YOTA</p>
+        <h1>Your travel agent is preparing for takeoff.</h1>
+      </div>
+      <div class="runway-scene" aria-hidden="true">
+        <div class="runway">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="plane" id="introPlane">
+          <div class="plane-body"></div>
+          <div class="wing wing-left"></div>
+          <div class="wing wing-right"></div>
+          <div class="tail"></div>
+          <div class="window-row">
+            <i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+      </div>
+      <button class="skip-intro" id="skipIntro" type="button">Skip intro</button>
+    </div>
+
+    <main class="app-shell" id="appShell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">Y</div>
+          <div>
+            <p class="eyebrow">YOTA</p>
+            <h2>Your Travel Agent</h2>
+          </div>
+        </div>
+        <div class="agent-status">
+          <span class="pulse"></span>
+          <span id="unifiedStatus">YOTA unified assistant online</span>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Sweden-first travel assistant</p>
+          <h1>Tell YOTA where you want to go from Sweden. It will sort flights by cheapest, fastest, and best fit.</h1>
+          <p>
+            This prototype uses European routes, Swedish traveler defaults, SEK pricing, booking confirmation,
+            email delivery, and EU-style bank monitoring. Real booking requires airline, payment, email,
+            and regulated banking APIs.
+          </p>
+        </div>
+        <div class="trip-summary" aria-live="polite">
+          <p class="summary-label">Current request</p>
+          <h3 id="tripTitle">No trip yet</h3>
+          <p id="tripDetails">Start with a route like "Stockholm to Barcelona next Friday".</p>
+          <div class="agent-stack" aria-label="YOTA sub-agent status">
+            <div>
+              <span>NLP agent</span>
+              <strong id="nlpStatus">Ready for travel request</strong>
+            </div>
+            <div>
+              <span>Payment agent</span>
+              <strong id="paymentStatus">Ready for booking</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="YOTA travel assistant workspace">
+        <section class="chat-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Assistant chat</p>
+              <h3>YOTA Concierge</h3>
+            </div>
+            <button class="ghost-button" type="button" id="restartIntro">Replay takeoff</button>
+          </div>
+
+          <div class="messages" id="messages" aria-live="polite"></div>
+
+          <div class="chips" aria-label="Example requests">
+            <button type="button" data-prompt="I want to fly from Stockholm to Barcelona next Friday. I prefer economy, window seat, extra legroom, cheapest if possible.">Stockholm to Barcelona</button>
+            <button type="button" data-prompt="Book me from Gothenburg to Berlin tomorrow morning. Fastest route, aisle seat, carry-on only.">Gothenburg to Berlin</button>
+            <button type="button" data-prompt="I need Malmo to Rome this weekend. Best balance, vegetarian meal, window seat.">Malmo to Rome</button>
+          </div>
+
+          <form class="chat-form" id="chatForm">
+            <label class="sr-only" for="chatInput">Message YOTA</label>
+            <input id="chatInput" type="text" autocomplete="off" placeholder="Try: Stockholm to Barcelona next Friday, cheapest, window seat">
+            <button type="submit">Send</button>
+          </form>
+        </section>
+
+        <aside class="side-panel" aria-label="Trip controls and monitoring">
+          <section class="tool-card">
+            <div class="tool-card-header">
+              <div>
+                <p class="eyebrow">Saved traveler profile</p>
+                <h3>Booking preferences</h3>
+              </div>
+              <span class="small-badge">Sweden</span>
+            </div>
+            <form class="preferences" id="preferencesForm">
+              <label>
+                Traveler name
+                <input id="travelerNamePreference" type="text" autocomplete="name" placeholder="Freja Andersson">
+              </label>
+              <label>
+                Home airport
+                <select id="homeAirportPreference">
+                  <option>Stockholm Arlanda (ARN)</option>
+                  <option>Gothenburg Landvetter (GOT)</option>
+                  <option>Malmo via Copenhagen (CPH)</option>
+                  <option>Stockholm Bromma (BMA)</option>
+                  <option>Umea Airport (UME)</option>
+                </select>
+              </label>
+              <label>
+                Seat
+                <select id="seatPreference">
+                  <option>Window</option>
+                  <option>Aisle</option>
+                  <option>Extra legroom</option>
+                  <option>No preference</option>
+                </select>
+              </label>
+              <label>
+                Cabin
+                <select id="cabinPreference">
+                  <option>Economy</option>
+                  <option>Premium economy</option>
+                  <option>Business</option>
+                </select>
+              </label>
+              <label>
+                Priority
+                <select id="priorityPreference">
+                  <option>Best balance</option>
+                  <option>Cheapest</option>
+                  <option>Fastest</option>
+                  <option>Fewest stops</option>
+                </select>
+              </label>
+              <label>
+                Email
+                <input id="emailPreference" type="email" placeholder="freja.andersson@example.se">
+              </label>
+              <button type="submit" class="secondary-button">Save preferences</button>
+            </form>
+          </section>
+
+          <section class="tool-card">
+            <div class="tool-card-header">
+              <div>
+                <p class="eyebrow">Flight options</p>
+                <h3>Best matches</h3>
+              </div>
+              <span class="small-badge" id="optionCount">0 found</span>
+            </div>
+            <div class="option-list" id="optionList">
+              <p class="empty-state">Ask YOTA for a trip and flight choices will appear here.</p>
+            </div>
+          </section>
+
+          <section class="tool-card bank-card">
+            <div class="tool-card-header">
+              <div>
+                <p class="eyebrow">Swedish bank monitor</p>
+                <h3>Spending guard</h3>
+              </div>
+              <span class="small-badge warning">Demo</span>
+            </div>
+            <p class="bank-note">
+              Real bank monitoring in Europe must use secure user consent through PSD2/Open Banking.
+              This demo only estimates SEK balance impact after a simulated booking.
+            </p>
+            <div class="bank-row">
+              <span>Available balance</span>
+              <strong id="balanceValue">28 500 SEK</strong>
+            </div>
+            <div class="bank-row">
+              <span>Trip hold</span>
+              <strong id="tripHold">0 SEK</strong>
+            </div>
+            <div class="ledger" id="ledger">
+              <p>No booking activity yet.</p>
+            </div>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
