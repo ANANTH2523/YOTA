@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "static": "python3 -m http.server 5188",
-    "check": "node --check server.js && node --check app.js && node --check agents/nlp-agent.js && node --check agents/payment-agent.js"
+    "check": "node --check server.js && node --check app.js && node --check agents/nlp-agent.js && node --check agents/payment-agent.js && node scripts/check-env.mjs"
   },
   "dependencies": {
     "@solvapay/auth": "^1.1.0",

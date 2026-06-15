@@ -190,7 +190,22 @@
               Hosted checkout is created by the server through SolvaPay. Swedish bank monitoring still
               requires secure user consent through PSD2/Open Banking.
             </p>
-            <button class="secondary-button full-width" type="button" id="manageBillingButton">Manage SolvaPay billing</button>
+            <div class="solvapay-manager" aria-label="SolvaPay manager">
+              <div class="manager-row">
+                <span>Product</span>
+                <strong id="solvaPayProduct">Not connected</strong>
+              </div>
+              <div class="manager-row">
+                <span>Plan</span>
+                <strong id="solvaPayPlan">Not connected</strong>
+              </div>
+              <p id="solvaPayDetails">Checking SolvaPay setup...</p>
+              <div class="manager-actions">
+                <button class="secondary-button" type="button" id="setupSolvaPayButton">Set up YOTA product</button>
+                <button class="ghost-button" type="button" id="refreshSolvaPayButton">Refresh</button>
+              </div>
+              <button class="secondary-button full-width" type="button" id="manageBillingButton">Open customer billing portal</button>
+            </div>
             <div class="bank-row">
               <span>Available balance</span>
               <strong id="balanceValue">28 500 SEK</strong>

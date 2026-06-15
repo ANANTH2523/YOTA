@@ -662,6 +662,12 @@ button {
   border-color: #fed7aa;
 }
 
+.small-badge.ready {
+  color: #065f46;
+  background: #d1fae5;
+  border-color: #a7f3d0;
+}
+
 .option-list {
   display: grid;
   gap: 12px;
@@ -719,6 +725,55 @@ button {
   margin: 12px 0;
   color: var(--muted);
   line-height: 1.5;
+}
+
+.solvapay-manager {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.manager-row,
+.manager-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.manager-row span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.manager-row strong {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.solvapay-manager p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.manager-actions button {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
 }
 
 .bank-row {

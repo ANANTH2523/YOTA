@@ -75,10 +75,25 @@ function customerRefFromEmail(email) {
 
 function safeError(error) {
   const message = error instanceof Error ? error.message : String(error);
-  if (/No products found|List products failed|Get product failed|Create checkout session failed/i.test(message)) {
+  if (/No products found|List products failed|Get product failed|Create checkout session failed|Create product failed|Create plan failed/i.test(message)) {
     return message;
   }
   return "SolvaPay request failed";
+}
+
+async function listSolvaPayProducts() {
+  if (!solvaPay) return [];
+  try {
+    const products = await solvaPay.listProducts();
+    return products.map((product) => ({
+      reference: product.reference,
+      name: product.name,
+      status: product.status,
+      planCount: product.plans?.length || 0
+    }));
+  } catch {
+    return [];
+  }
 }
 
 async function getConfiguredProduct() {
@@ -98,11 +113,22 @@ async function getConfiguredProduct() {
     if (envProductRef) {
       const product = await solvaPay.getProduct(envProductRef);
       const plans = product.plans?.length ? product.plans : await solvaPay.listPlans(envProductRef);
+      const planRef = envPlanRef || plans.find((plan) => plan.status === "active")?.reference || plans[0]?.reference || "";
+      if (!planRef) {
+        return {
+          ok: false,
+          status: 503,
+          code: "missing_plan",
+          productRef: product.reference || envProductRef,
+          productName: product.name || "YOTA booking",
+          message: "SolvaPay product exists, but no active plan is connected. Use Set up YOTA product to create the booking plan."
+        };
+      }
       return {
         ok: true,
         productRef: product.reference || envProductRef,
         productName: product.name || "YOTA booking",
-        planRef: envPlanRef || plans.find((plan) => plan.status === "active")?.reference || plans[0]?.reference || "",
+        planRef,
         planCount: plans.length
       };
     }
@@ -119,11 +145,22 @@ async function getConfiguredProduct() {
     }
 
     const plans = product.plans?.length ? product.plans : await solvaPay.listPlans(product.reference);
+    const planRef = envPlanRef || plans.find((plan) => plan.status === "active")?.reference || plans[0]?.reference || "";
+    if (!planRef) {
+      return {
+        ok: false,
+        status: 503,
+        code: "missing_plan",
+        productRef: product.reference,
+        productName: product.name || "YOTA booking",
+        message: "SolvaPay product exists, but no active plan is connected. Use Set up YOTA product to create the booking plan."
+      };
+    }
     return {
       ok: true,
       productRef: product.reference,
       productName: product.name || "YOTA booking",
-      planRef: envPlanRef || plans.find((plan) => plan.status === "active")?.reference || plans[0]?.reference || "",
+      planRef,
       planCount: plans.length
     };
   } catch (error) {
@@ -158,15 +195,96 @@ async function ensureCustomer({ email, travelerName }) {
 
 async function handleStatus(res) {
   const product = await getConfiguredProduct();
-  sendJson(res, product.ok ? 200 : product.status, {
+  const products = await listSolvaPayProducts();
+  sendJson(res, 200, {
     configured: product.ok,
     productRef: product.productRef || "",
     productName: product.productName || "",
     planRef: product.planRef || "",
     planCount: product.planCount || 0,
     message: product.ok ? "SolvaPay checkout is ready." : product.message,
-    code: product.code || "ready"
+    code: product.code || "ready",
+    products
   });
+}
+
+async function handleSetup(res) {
+  if (!solvaPay) {
+    sendJson(res, 503, {
+      error: "missing_secret",
+      message: "SOLVAPAY_SECRET_KEY is missing. Run npx -y solvapay@latest init."
+    });
+    return;
+  }
+
+  try {
+    const products = await solvaPay.listProducts();
+    const existing = products.find((product) => /yota/i.test(product.name || ""));
+    const product =
+      existing ||
+      (await solvaPay.createProduct({
+        name: "YOTA Travel Booking",
+        description: "Hosted checkout product for the YOTA Sweden-based travel assistant.",
+        productType: "travel-assistant",
+        config: {
+          fulfillmentType: "digital",
+          deliveryMethod: "api",
+          validityPeriod: 30
+        },
+        metadata: {
+          app: "YOTA",
+          country: "SE",
+          currency: "SEK"
+        }
+      }));
+
+    const productRef = product.reference || product.product?.reference;
+    if (!productRef) {
+      sendJson(res, 502, { error: "setup_failed", message: "SolvaPay did not return a product reference." });
+      return;
+    }
+
+    const plans = await solvaPay.listPlans(productRef).catch(() => []);
+    const existingPlan = plans.find((plan) => /booking/i.test(plan.name || "")) || plans[0];
+    const plan =
+      existingPlan ||
+      (await solvaPay.createPlan({
+        productRef,
+        name: "YOTA Booking Pass",
+        description: "One-time hosted checkout access for a YOTA assisted booking.",
+        type: "one-time",
+        price: 9900,
+        currency: "SEK",
+        usageTracking: {
+          method: "manual",
+          granularity: "daily"
+        },
+        limits: {
+          bookings: 1
+        },
+        metadata: {
+          app: "YOTA",
+          kind: "booking-pass"
+        },
+        features: {
+          flightSearch: true,
+          bookingAssistance: true,
+          emailConfirmation: true
+        },
+        status: "active"
+      }));
+
+    sendJson(res, 200, {
+      configured: true,
+      productRef,
+      productName: product.name || "YOTA Travel Booking",
+      planRef: plan.reference || plan.plan?.reference || "",
+      planName: plan.name || "YOTA Booking Pass",
+      message: existing ? "Existing YOTA SolvaPay product connected." : "YOTA SolvaPay product and plan created."
+    });
+  } catch (error) {
+    sendJson(res, 502, { error: "setup_failed", message: safeError(error) });
+  }
 }
 
 async function handleCheckout(req, res) {
@@ -280,8 +398,16 @@ function serveStatic(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const requestPath = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
   const filePath = normalize(join(root, requestPath));
+  const relativePath = filePath.slice(root.length + 1);
 
-  if (!filePath.startsWith(root) || !existsSync(filePath)) {
+  if (
+    !filePath.startsWith(root) ||
+    !existsSync(filePath) ||
+    relativePath.startsWith(".") ||
+    relativePath.startsWith("node_modules") ||
+    relativePath.includes("/.") ||
+    relativePath.startsWith("package-lock")
+  ) {
     sendJson(res, 404, { error: "not_found" });
     return;
   }
@@ -295,6 +421,10 @@ const server = createServer(async (req, res) => {
   try {
     if (req.method === "GET" && req.url.startsWith("/api/solvapay/status")) {
       await handleStatus(res);
+      return;
+    }
+    if (req.method === "POST" && req.url === "/api/solvapay/setup") {
+      await handleSetup(res);
       return;
     }
     if (req.method === "POST" && req.url === "/api/create-checkout-session") {

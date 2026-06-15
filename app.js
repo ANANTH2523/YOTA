@@ -27,6 +27,11 @@ const paymentStatus = document.querySelector("#paymentStatus");
 const unifiedStatus = document.querySelector("#unifiedStatus");
 const billingStatus = document.querySelector("#billingStatus");
 const manageBillingButton = document.querySelector("#manageBillingButton");
+const setupSolvaPayButton = document.querySelector("#setupSolvaPayButton");
+const refreshSolvaPayButton = document.querySelector("#refreshSolvaPayButton");
+const solvaPayProduct = document.querySelector("#solvaPayProduct");
+const solvaPayPlan = document.querySelector("#solvaPayPlan");
+const solvaPayDetails = document.querySelector("#solvaPayDetails");
 
 const nlpAgent = new ChatNlpAgent();
 const paymentAgent = new PaymentBookingAgent({ startingBalance: 28500 });
@@ -138,6 +143,15 @@ function setBillingStatus(text, isReady = false) {
   billingStatus.textContent = text;
   billingStatus.classList.toggle("ready", isReady);
   billingStatus.classList.toggle("warning", !isReady);
+  manageBillingButton.disabled = !isReady;
+}
+
+function renderSolvaPayManager(status) {
+  solvaPayProduct.textContent = status.productName || status.productRef || "Not connected";
+  solvaPayPlan.textContent = status.planRef || "Not connected";
+  solvaPayDetails.textContent = status.message || "SolvaPay status unavailable.";
+  setupSolvaPayButton.disabled = status.configured;
+  setupSolvaPayButton.textContent = status.configured ? "YOTA product connected" : "Set up YOTA product";
 }
 
 function renderOptions() {
@@ -339,6 +353,32 @@ manageBillingButton.addEventListener("click", async () => {
   }
 });
 
+setupSolvaPayButton.addEventListener("click", async () => {
+  setupSolvaPayButton.disabled = true;
+  setupSolvaPayButton.textContent = "Setting up...";
+  setSubAgentStatus("payment", "Setting up SolvaPay product");
+  try {
+    const result = await requestJson("/api/solvapay/setup", { method: "POST" });
+    renderSolvaPayManager(result);
+    setBillingStatus("SolvaPay ready", true);
+    addMessage("agent", "SolvaPay is now connected for YOTA.", `${result.productName} - ${result.planName || result.planRef}`);
+    addLedgerItem("SolvaPay manager", result.message);
+    setSubAgentStatus("payment", "SolvaPay checkout ready");
+  } catch (error) {
+    setupSolvaPayButton.disabled = false;
+    setupSolvaPayButton.textContent = "Retry SolvaPay setup";
+    solvaPayDetails.textContent = error.data?.message || error.message;
+    addMessage("agent", "SolvaPay setup failed.", error.data?.message || error.message);
+    setSubAgentStatus("payment", "SolvaPay setup failed");
+  }
+});
+
+refreshSolvaPayButton.addEventListener("click", async () => {
+  refreshSolvaPayButton.disabled = true;
+  await initSolvaPay();
+  refreshSolvaPayButton.disabled = false;
+});
+
 skipIntro.addEventListener("click", showApp);
 restartIntro.addEventListener("click", replayIntro);
 
@@ -356,11 +396,22 @@ window.setTimeout(showApp, 5400);
 async function initSolvaPay() {
   try {
     const status = await requestJson("/api/solvapay/status");
-    setBillingStatus("SolvaPay ready", true);
-    addLedgerItem("SolvaPay", `${status.productName || status.productRef} connected`);
-    setSubAgentStatus("payment", "SolvaPay checkout ready");
+    renderSolvaPayManager(status);
+    if (status.configured) {
+      setBillingStatus("SolvaPay ready", true);
+      addLedgerItem("SolvaPay", `${status.productName || status.productRef} connected`);
+      setSubAgentStatus("payment", "SolvaPay checkout ready");
+    } else {
+      setBillingStatus("Setup needed", false);
+      addLedgerItem("SolvaPay setup", status.message);
+      setSubAgentStatus("payment", "SolvaPay product needed");
+    }
   } catch (error) {
     setBillingStatus("Setup needed", false);
+    renderSolvaPayManager({
+      configured: false,
+      message: error.data?.message || error.message
+    });
     addLedgerItem("SolvaPay setup", error.data?.message || error.message);
     setSubAgentStatus("payment", "SolvaPay product needed");
   }
